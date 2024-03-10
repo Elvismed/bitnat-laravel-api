@@ -13,10 +13,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 Route::group([
 
     'middleware' => 'api',
@@ -29,5 +25,8 @@ Route::group([
     Route::post('refresh', 'App\Http\Controllers\AuthController@refresh');
     Route::post('me',  'App\Http\Controllers\AuthController@me');
     Route::post('register', 'App\Http\Controllers\AuthController@register');
-
+});
+Route::middleware('jwt.verify')->group(function(){
+    Route::post('create', 'App\Http\Controllers\BooksController@create');
+    Route::get('getbook', 'App\Http\Controllers\BooksController@getbook');
 });

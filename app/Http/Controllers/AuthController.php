@@ -31,11 +31,18 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        try {
+            if (! $token = auth()->attempt($credentials)) {
+                return response()->json(['error' => 'Invalid Credentials'], 401);
+            }
+    
+            return $this->respondWithToken($token);
+        } catch (JWTexception $e) {
+            return response()->json([
+                'error'=>'not created token'
+            ],500);
         }
-
-        return $this->respondWithToken($token);
+        return reponse()-> json(compact('token'));
     }
 
     /**
@@ -91,6 +98,7 @@ class AuthController extends Controller
             'name'=> 'required',
             'email'=> 'required|string|email|max:100|unique:users',
             'password'=> 'required|string|min:6',
+            'role'=> 'required|string'
         ]);
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(),400);
@@ -99,7 +107,6 @@ class AuthController extends Controller
         $validator->validate(),
         ['password' => bcrypt($request->password)]
       ));
-      
       return response()->json([
         'message'=>'User Created',
         'user'=> $user
